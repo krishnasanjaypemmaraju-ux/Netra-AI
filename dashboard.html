@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width">
+    <title>NETRA AI</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box
+        }
+
+        body {
+            background: #060606;
+            color: white;
+            font-family: Arial, sans-serif;
+            padding: 20px
+        }
+
+        h1 {
+            color: #ff2222;
+            font-size: 2.5em;
+            letter-spacing: 5px;
+            text-align: center;
+            margin-bottom: 5px
+        }
+
+        .sub {
+            color: #555;
+            text-align: center;
+            margin-bottom: 20px
+        }
+
+        .status {
+            background: #003300;
+            color: #00ff00;
+            text-align: center;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px
+        }
+
+        .stats {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px
+        }
+
+        .stat {
+            flex: 1;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center
+        }
+
+        .stat h2 {
+            font-size: 2em
+        }
+
+        .stat p {
+            color: #aaa;
+            font-size: 0.8em
+        }
+
+        .s1 {
+            background: #111;
+            border: 1px solid #333
+        }
+
+        .s2 {
+            background: #2a0000;
+            border: 1px solid #ff2222
+        }
+
+        .s3 {
+            background: #2a1500;
+            border: 1px solid #ff8800
+        }
+
+        .s4 {
+            background: #003300;
+            border: 1px solid #00aa00
+        }
+
+        .grid {
+            display: flex;
+            gap: 20px
+        }
+
+        .feed {
+            flex: 2;
+            background: #111;
+            border-radius: 12px;
+            padding: 20px
+        }
+
+        .log {
+            flex: 1;
+            background: #111;
+            border-radius: 12px;
+            padding: 20px;
+            height: 500px;
+            overflow-y: auto
+        }
+
+        .feed h3,
+        .log h3 {
+            color: #aaa;
+            margin-bottom: 15px
+        }
+
+        img {
+            width: 100%;
+            border-radius: 10px
+        }
+
+        .card {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 10px
+        }
+
+        .CRITICAL {
+            background: #2a0000;
+            border-left: 5px solid #ff0000;
+            animation: pulse 1s infinite
+        }
+
+        .HIGH {
+            background: #2a1200;
+            border-left: 5px solid #ff6600
+        }
+
+        .MEDIUM {
+            background: #1a1a00;
+            border-left: 5px solid #ffcc00
+        }
+
+        .LOW {
+            background: #001a00;
+            border-left: 5px solid #00cc00
+        }
+
+        @keyframes pulse {
+            0% {
+                opacity: 1
+            }
+
+            50% {
+                opacity: 0.6
+            }
+
+            100% {
+                opacity: 1
+            }
+        }
+
+        .card b {
+            display: block
+        }
+
+        .card small {
+            color: #aaa;
+            display: block;
+            margin-top: 3px
+        }
+
+        .vic {
+            color: #ff9999;
+            font-size: 0.8em
+        }
+
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 15px
+        }
+
+        .leg {
+            background: #1a1a1a;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.75em;
+            color: white
+        }
+
+        .empty {
+            color: #333;
+            text-align: center;
+            margin-top: 50px
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>NETRA AI</h1>
+    <p class="sub">Complete Social Crime Detection System</p>
+
+    <div class="status">ACTIVE - Scanning every 2 seconds - All crimes monitored</div>
+
+    <div class="stats">
+        <div class="stat s1">
+            <h2 id="tot">0</h2>
+            <p>Total Alerts</p>
+        </div>
+        <div class="stat s2">
+            <h2 id="crit">0</h2>
+            <p>Critical</p>
+        </div>
+        <div class="stat s3">
+            <h2 id="high">0</h2>
+            <p>High</p>
+        </div>
+        <div class="stat s4">
+            <h2 id="status">SAFE</h2>
+            <p>Status</p>
+        </div>
+    </div>
+
+    <div class="grid">
+        <div class="feed">
+            <h3>LIVE CAMERA FEED</h3>
+            <img id="feed" src="current_frame.jpg" />
+            <div class="legend">
+                <span class="leg">Theft</span>
+                <span class="leg">Assault</span>
+                <span class="leg">Harassment</span>
+                <span class="leg">Rape Attempt</span>
+                <span class="leg">Murder Attempt</span>
+                <span class="leg">Kidnapping</span>
+                <span class="leg">Weapon</span>
+                <span class="leg">Child Danger</span>
+                <span class="leg">Distress</span>
+                <span class="leg">Stalking</span>
+            </div>
+        </div>
+
+        <div class="log">
+            <h3>LIVE ALERT LOG</h3>
+            <div id="list">
+                <p class="empty">No alerts yet. Monitoring active.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        setInterval(() => {
+            document.getElementById('feed').src = 'current_frame.jpg?t=' + Date.now();
+        }, 2000);
+
+        setInterval(async () => {
+            try {
+                const res = await fetch('alerts.json?t=' + Date.now());
+                const data = await res.json();
+                if (!data.length) return;
+                document.getElementById('tot').textContent = data.length;
+                document.getElementById('crit').textContent = data.filter(a => a.severity == 'CRITICAL').length;
+                document.getElementById('high').textContent = data.filter(a => a.severity == 'HIGH').length;
+                const last = data[data.length - 1];
+                const st = document.getElementById('status');
+                if (last.severity == 'CRITICAL') { st.textContent = 'CRITICAL'; st.style.color = '#ff0000'; }
+                else if (last.severity == 'HIGH') { st.textContent = 'HIGH'; st.style.color = '#ff6600'; }
+                else { st.textContent = 'SAFE'; st.style.color = '#00ff00'; }
+                const list = document.getElementById('list');
+                list.innerHTML = '';
+                [...data].reverse().forEach(a => {
+                    const name = a.crime.replace(/_/g, ' ');
+                    list.innerHTML += `
+      <div class="card ${a.severity}">
+        <b>ALERT - ${name}</b>
+        <small>Time: ${a.time} | Confidence: ${a.confidence}%</small>
+        <small>${a.description}</small>
+        ${a.victims ? `<div class="vic">Victim: ${a.victims}</div>` : ''}
+      </div>`;
+                });
+            } catch (e) { }
+        }, 2000);
+    </script>
+</body>
+
+</html>
